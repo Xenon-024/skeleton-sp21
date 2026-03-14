@@ -1,0 +1,9 @@
+{
+    "java.project.sourcePaths": ["."],
+    "java.project.referencedLibraries": [
+        "javalib/*.jar"
+    ],
+    "code-runner.executorMap": {
+        "java": "cd $workspaceRoot && javac -cp \".;javalib/*\" game2048/Main.java && java -cp \".;javalib/*\" game2048.Main"
+    }
+}

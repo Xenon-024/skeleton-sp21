@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch game2048.Main",
+            "request": "launch",
+            "mainClass": "game2048.Main",
+            "classPaths": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/javalib/*"
+            ]
+        }
+    ]
+}

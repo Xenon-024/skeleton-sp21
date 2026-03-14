@@ -106,13 +106,48 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
-    public boolean tilt(Side side) {
-        boolean changed;
-        changed = false;
+    public boolean tilt(Side side) { //注意先罗列出需要完成功能的逻辑顺序，并列出每个功能完成后的后效性
+        boolean changed = false;
+        int size = board.size();
+        board.setViewingPerspective(side);
+        // 统一按“向北”处理：逐列从上到下扫描
+        for (int col = 0; col < size; col++) {
+            // merged[row] = 这一行在本列本次 tilt 中是否已经发生过合并
+            boolean[] merged = new boolean[size];
+            for (int row = size - 2; row >= 0; row--) {
+                Tile curr = board.tile(col, row);
+                if (curr == null) { //跳过空格
+                    continue;
+                }
+                int dest = row;//保存原位置
 
-        // TODO: Modify this.board (and perhaps this.score) to account
-        // for the tilt to the Side SIDE. If the board changed, set the
-        // changed local variable to true.
+                // 先尽量上移，穿过空格
+                while (dest + 1 < size && board.tile(col, dest + 1) == null) {
+                    dest++;
+                }
+
+                // 如果上方是同值且该位置本轮未合并，则可继续到上方做合并
+                if (dest + 1 < size) {
+                    Tile next = board.tile(col, dest + 1);
+                    if (next != null && next.value() == curr.value() && !merged[dest + 1]) {
+                        dest++;
+                    }
+                }
+                // dest为当前的砖块最终确认的一定或者合并到的位置
+                // 只有目标位置变化才移动
+                if (dest != row) {
+                    boolean didMerge = board.move(col, dest, curr);
+                    changed = true;
+
+                    if (didMerge) {
+                        merged[dest] = true;
+                        score += board.tile(col, dest).value();
+                    }
+                }
+            }
+        }
+
+        board.setViewingPerspective(Side.NORTH); //恢复移动方向默认值
 
         checkGameOver();
         if (changed) {
@@ -120,7 +155,6 @@ public class Model extends Observable {
         }
         return changed;
     }
-
     /** Checks if the game is over and sets the gameOver variable
      *  appropriately.
      */
@@ -138,6 +172,13 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for(int i=0;i<4;i++){
+            for(int j=0;j<4;j++){
+                if(b.tile(i,j)==null){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +189,13 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for(int i=0;i<4;i++){
+            for(int j=0;j<4;j++){
+                if(b.tile(i,j)!=null && b.tile(i,j).value()==MAX_PIECE){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +207,19 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(emptySpaceExists(b)){ //有空位
+            return true; 
+        }
+        for(int i=0;i<4;i++){ //任意方向有相邻相同数字
+            for(int j=0;j<4;j++){
+                if(i+1<4 && b.tile(i,j).value()==b.tile(i+1,j).value()){
+                    return true;
+                }
+                if(j+1<4 && b.tile(i,j).value()==b.tile(i,j+1).value()){
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
